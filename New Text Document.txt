@@ -1,0 +1,153 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Data.SqlClient;
+
+namespace WindowsFormsApp1
+{
+    public partial class Form1 : Form
+    {
+        SqlConnection conn = new SqlConnection("Data Source=LAPTOP-LNVQK3DQ;Initial Catalog=QLCH;Integrated Security=True");
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+
+        public void showData() {
+            conn.Open();
+            SqlDataAdapter adapter = new SqlDataAdapter("Select * from TTSP",conn);
+            SqlCommand cmd = new SqlCommand("DBCC CHECKIDENT (TTSP, RESEED, 0)", conn);
+            
+            DataTable dthd = new DataTable();
+
+            adapter.Fill(dthd);
+            dataGridView1.DataSource = dthd;
+            //Hiển thị khi load form
+            SqlCommand sqlTotal = new SqlCommand(@"SELECT SUM(thanhTien) FROM TTSP", conn);
+            int count = Convert.ToInt32(sqlTotal.ExecuteScalar());
+            textBox2.Text = count.ToString();
+
+            conn.Close();
+
+        }
+
+        public void showCB()
+        {
+            conn.Open();
+            SqlDataAdapter sqlAdapterCB = new SqlDataAdapter("Select * from DSSP",conn);
+
+            DataTable dtsp = new DataTable();
+
+            sqlAdapterCB.Fill(dtsp);
+
+            comboBox1.DataSource = dtsp;
+            comboBox1.DisplayMember = "tenSP";
+            comboBox1.ValueMember = "tenSP";
+
+            conn.Close();
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            showData();
+            showCB();
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            SqlConnection conn = new SqlConnection("Data Source=LAPTOP-LNVQK3DQ;Initial Catalog=QLCH;Integrated Security=True");
+
+            conn.Open();
+            try
+            {
+                int total = Convert.ToInt32(textBox1.Text) * Convert.ToInt32(numericUpDown1.Text);
+                SqlCommand cmdAdd = new SqlCommand(@"INSERT INTO TTSP( TenSP, donGia, soluong, thanhTien)VALUES('" + comboBox1.Text +"','" + (Convert.ToInt32(textBox1.Text)).ToString() + "','" + (Convert.ToInt32(numericUpDown1.Text)).ToString() + "','" + total.ToString() + "')", conn);
+                //P thêm vào mới thêm đc
+                int a = cmdAdd.ExecuteNonQuery();
+                if (a > 0)
+                {
+                    MessageBox.Show("ok");
+                }
+                else
+                {
+                    MessageBox.Show("f");
+                }
+                
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("false");
+
+            }
+            finally
+            {
+                showData();
+            }
+
+
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            comboBox1.Text = dataGridView1.CurrentRow.Cells[1].Value.ToString();
+            textBox1.Text = dataGridView1.CurrentRow.Cells[2].Value.ToString();
+            numericUpDown1.Text = dataGridView1.CurrentRow.Cells[3].Value.ToString();
+            textBox5.Text = dataGridView1.CurrentRow.Cells[0].Value.ToString();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            SqlConnection conn = new SqlConnection("Data Source=LAPTOP-LNVQK3DQ;Initial Catalog=QLCH;Integrated Security=True");
+
+
+
+             conn.Open();
+            try
+            {
+        
+                SqlCommand cmdDel = new SqlCommand(@"DELETE FROM TTSP where STT = '"+ textBox5.Text + "'", conn);
+                //P thêm vào mới xóa đc
+                int a = cmdDel.ExecuteNonQuery();
+                if (a > 0)
+                {
+                    MessageBox.Show("ok");
+                }
+                else
+                {
+                    MessageBox.Show("f");
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("false");
+
+            }
+            finally
+            {
+                showData();
+            }
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+
+        }.
+    }
+}
+select ROW_NUMBER() over(order by STT) as STT1, * from NV

@@ -1,0 +1,111 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Data.SqlClient;
+
+namespace WindowsFormsApp1
+{
+    public partial class Form1 : Form
+    {
+        SqlConnection conn = new SqlConnection("Data Source=LAPTOP-LNVQK3DQ;Initial Catalog=QLCHH;Integrated Security=True");
+        public Form1()
+        {
+            InitializeComponent();
+            conn.Open();
+        }
+
+        public void showData()
+        {
+            SqlDataAdapter adapter = new SqlDataAdapter("Select ROW_NUMBER() OVER(ORDER BY STT1) as STT,tenSP,donGia,soLuong,thanhTien from TTSP",conn);
+            SqlDataAdapter adapter1 = new SqlDataAdapter("Select* from DSSP", conn);
+            DataTable dtsp = new DataTable();
+            DataTable dtcb = new DataTable();
+            adapter.Fill(dtsp);
+            adapter1.Fill(dtcb);
+            dataGridView1.DataSource = dtsp;
+
+            comboBox1.DataSource = dtcb;
+            comboBox1.ValueMember = "tenSP";
+            comboBox1.DisplayMember = "tenSP";
+        }
+
+        
+
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            showData();
+            
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+            try
+            {
+                int total = Convert.ToInt32(textBox1.Text) + Convert.ToInt32(numericUpDown1.Text);
+                SqlCommand cmd = new SqlCommand("INSERT INTO TTSP (tenSP, donGia, soLuong, thanhTien) VALUES('"+ comboBox1.Text.ToString() + "','"+ Convert.ToInt32(textBox1.Text) + "','"+ Convert.ToInt32(numericUpDown1.Text) + "','"+ total.ToString() + "')", conn);
+                cmd.ExecuteNonQuery();
+
+
+            }
+            catch
+            {
+                MessageBox.Show("f");
+            }
+            finally
+            {
+                showData();
+            }
+
+
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            textBox5.Text = dataGridView1.CurrentRow.Cells["STT"].Value.ToString();
+            comboBox1.Text = dataGridView1.CurrentRow.Cells["tenSP"].Value.ToString();
+            textBox1.Text = dataGridView1.CurrentRow.Cells["donGia"].Value.ToString();
+            numericUpDown1.Text = dataGridView1.CurrentRow.Cells["soLuong"].Value.ToString();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                SqlCommand cmd = new SqlCommand(@"DELETE FROM TTSP where STT = '"+ textBox5.Text + "'", conn);
+                cmd.ExecuteNonQuery();
+            }
+            catch
+            {
+                MessageBox.Show("f");
+            }
+            finally
+            {
+                showData();
+            }
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            conn.Close();
+        }
+    }
+}
